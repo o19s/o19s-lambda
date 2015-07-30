@@ -1,0 +1,81 @@
+
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "AWS CloudFormation AMI Look Up Sample Template: Demonstrates how to dynamically specify an AMI ID. This template provisions an EC2 instance with an AMI ID that is based on the instance's type and region. **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
+
+  "Parameters": {
+    "S3Bucket" : {
+      "Description" : "The name of the Amazon Simple Storage Service (Amazon S3) bucket that contains the source code of your Lambda function. The S3 bucket must be in the same region in which the stack is created.",
+      "Type" : "String"
+    },
+    "S3Key" : {
+      "Description" : "The location and name of your packaged source code (.zip file).",
+      "Type" : "String"
+    }
+  },
+
+  "Resources" : {
+    "AMILookupRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [ "lambda.amazonaws.com" ]
+              },
+              "Action": [ "sts:AssumeRole" ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "InvokePolicy",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:*"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ec2:DescribeImages"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    "AMILookup": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "index.handler",
+        "Role": { "Fn::GetAtt" : ["AMILookupRole", "Arn"] },
+        "Code": {
+          "S3Bucket": { "Ref" : "S3Bucket" },
+          "S3Key": { "Ref" : "S3Key"}
+        },
+        "Runtime": "nodejs",
+        "Timeout": "25"
+      }
+    }
+  },
+
+  "Outputs" : {
+    "AMILookup" : {
+      "Description": "The ARN of the Lambda function.",
+      "Value" : { "Fn::GetAtt": [ "AMILookup", "Arn" ] }
+    }
+  }
+}

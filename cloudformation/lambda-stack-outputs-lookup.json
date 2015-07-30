@@ -1,0 +1,52 @@
+
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Resources" : {
+    "LookupStackOutputsRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [ "lambda.amazonaws.com" ]
+              },
+              "Action": [ "sts:AssumeRole" ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "InvokePolicy",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:*"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudformation:DescribeStacks"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs" : {
+    "StackOutputsLookupRole" : {
+      "Description": "The ARN of the Lambda function.",
+      "Value" : { "Fn::GetAtt": [ "StackOutputsLookupRole", "Arn" ] }
+    }
+  }
+}
