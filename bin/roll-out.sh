@@ -19,16 +19,18 @@ LAMBDA_FNS="lambda-ami-lookup"
 LAMBDA_CASES=$(echo ${LAMBDA_FNS} | tr " " "|")
 LAMBDA_OUTPUT_FN="lambda-stack-outputs-lookup"
 LAMBDA_ALL="all"
-ALL_OPTS="$LAMBDA_FNS $LAMBDA_OUTPUT_FN $LAMBDA_ALL"
+ALL_OPTS="$LAMBDA_OUTPUT_FN $LAMBDA_FNS"
 
 usage () {
-    e_e $"Usage: $(basename $0) {${ALL_OPTS}}" 1
+    e_e $"Usage: $(basename $0) {${ALL_OPTS} all}" 1
 }
 
 [ -z "$1" ] && usage
 
 LAMBDA=$1
 FAIL=0
+S3_FULL_KEY=
+S3_TARGET=
 [ -z "$S3Bucket" ] && S3Bucket="o19s-lambda"
 [ -z "$S3Key" ] && S3Key="functions"
 
@@ -44,7 +46,6 @@ rollout_zip () {
     S3_FULL_KEY="${S3Key}/$(basename $TMPFILE)"
     S3_TARGET="s3://${S3Bucket}/${S3_FULL_KEY}"
     aws s3 cp ${TMPFILE} ${S3_TARGET} >/dev/null 2>&1 || e_e "Failed to copy ${S3_TARGET} from ${TMPFILE}"
-    return ${S3_FULL_KEY}
 }
 
 rollout_cfn () {
@@ -67,7 +68,7 @@ rollout_output_cfn() {
 }
 
 rollout_output () {
-    S3_FULL_KEY=$(rollout_zip $LAMBDA)
+    rollout_zip $LAMBDA
     rollout_output_cfn $LAMBDA
     # Poll for CFN complete, sleep for now...
     sleep 60
@@ -85,20 +86,23 @@ test_bucket () {
     bash -c "aws s3 ls s3://${S3Bucket}" >/dev/null 2>&1 || e_e "The S3 Bucket ${S3Bucket} doesn't exist please create it." 1
 }
 
-contains() { [[ $1 =~ $2 ]] && return 0 || return 1 }
+contains() {
+    [[ $1 =~ $2 ]] && return 0 || return 1
+}
 
 case "$LAMBDA" in
     ${LAMBDA_CASES})
-        S3_FULL_KEY=$(rollout_zip $LAMBDA)
+        rollout_zip $LAMBDA
         rollout_cfn $LAMBDA ${S3_FULL_KEY}
         ;;
     ${LAMBDA_OUTPUT_FN})
         rollout_output
         ;;
     ${LAMBDA_ALL})
-        rollout_zip ${LAMBDA_OUTPUT_FN}
+        LAMBDA=${LAMBDA_OUTPUT_FN}
+        rollout_output
         for i in ${LAMBDA_FNS}; do
-            S3_FULL_KEY=$(rollout_zip $i)
+            rollout_zip $i
             rollout_cfn $i ${S3_FULL_KEY}
         done
         ;;

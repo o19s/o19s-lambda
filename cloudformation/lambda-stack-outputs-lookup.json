@@ -46,7 +46,7 @@
   "Outputs" : {
     "StackOutputsLookupRole" : {
       "Description": "The ARN of the Lambda function.",
-      "Value" : { "Fn::GetAtt": [ "StackOutputsLookupRole", "Arn" ] }
+      "Value" : { "Fn::GetAtt": [ "LookupStackOutputsRole", "Arn" ] }
     }
   }
 }
