@@ -5,34 +5,16 @@
 # S3Key
 #
 # Note the S3 Bucket must exist.
-set -x
-e_e () {
-    #echo and exit
-    echo >&2 $1
-    exit $2
-}
 command -v aws >/dev/null 2>&1 || e_e "I require aws but it's not installed.  Aborting." 1
 
 cd $(dirname "$0")/..
 
-LAMBDA_FNS="lambda-ami-lookup"
-LAMBDA_CASES=$(echo ${LAMBDA_FNS} | tr " " "|")
-LAMBDA_OUTPUT_FN="lambda-stack-outputs-lookup"
-LAMBDA_ALL="all"
-ALL_OPTS="$LAMBDA_OUTPUT_FN $LAMBDA_FNS"
-
-usage () {
-    e_e $"Usage: $(basename $0) {${ALL_OPTS} all}" 1
-}
+. bin/common.sh
 
 [ -z "$1" ] && usage
 
 LAMBDA=$1
 FAIL=0
-S3_FULL_KEY=
-S3_TARGET=
-[ -z "$S3Bucket" ] && S3Bucket="o19s-lambda"
-[ -z "$S3Key" ] && S3Key="functions"
 
 rollout_zip () {
     test_bucket
@@ -40,7 +22,7 @@ rollout_zip () {
     TMPFILE=$(pwd)/$(mktemp -u -p out/build ${1}XXXXXX)
     ZIP_CMD="zip ${TMPFILE} ${1}.js"
     pushd src > /dev/null 2>&1
-    bash -c "${ZIP_CMD}" || FAIL=1
+    bash -c "${ZIP_CMD}" > /dev/null 2>&1 || FAIL=1
     TMPFILE=$TMPFILE.zip
     popd > /dev/null 2>&1
     S3_FULL_KEY="${S3Key}/$(basename $TMPFILE)"
