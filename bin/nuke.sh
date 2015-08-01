@@ -40,6 +40,7 @@ case "$LAMBDA" in
     ${LAMBDA_ALL})
         LAMBDA=${LAMBDA_OUTPUT_FN}
         for i in ${LAMBDA_FNS}; do
+	    LAMBDA=$i
             nuke_cfn $i
         done
         nuke_output
