@@ -18,7 +18,7 @@ FAIL=0
 
 rollout_zip () {
     test_bucket
-    [ ! -d "out" ] && { mkdir -p "out/build"; }
+    [ ! -d "out/build" ] && { mkdir -p "out/build"; }
     TMPFILE=$(pwd)/$(mktemp -u -p out/build ${1}XXXXXX)
     ZIP_CMD="zip ${TMPFILE} ${1}.js"
     pushd src > /dev/null 2>&1
@@ -59,8 +59,9 @@ rollout_output () {
     L_CMD="${L_CMD} --function-name StackOutputsLookup"
     L_CMD="${L_CMD} --code S3Bucket=${S3Bucket},S3Key=${S3_FULL_KEY}"
     L_CMD="${L_CMD} --role ${OUTPUT_ARN}"
-    L_CMD="${L_CMD} --handler index.handler"
+    L_CMD="${L_CMD} --handler lambda-stack-outputs-lookup.handler"
     L_CMD="${L_CMD} --runtime nodejs"
+    L_CMD="${L_CMD} --timeout 10"
     bash -c "${L_CMD}"
 }
 

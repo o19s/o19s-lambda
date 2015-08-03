@@ -11,15 +11,15 @@ FAIL=0
 
 
 nuke_output () {
-    echo $"Nuking $LAMBDA"
+    echo $"Nuking ${LAMBDA_OUTPUT_FN} Lambda function."
     L_CMD="aws lambda delete-function"
     L_CMD="${L_CMD} --function-name StackOutputsLookup"
     bash -c "${L_CMD}"
-    nuke_cfn $LAMBDA
+    nuke_cfn ${LAMBDA_OUTPUT_FN}
 }
 
 nuke_cfn () {
-    echo $"Nuking $LAMBDA"
+    echo $"Nuking $1 CloudFormation"
     CFN_CMD="aws cloudformation delete-stack"
     CFN_CMD="${CFN_CMD} --stack-name $1"
     bash -c "${CFN_CMD}"
@@ -38,9 +38,7 @@ case "$LAMBDA" in
         nuke_output
         ;;
     ${LAMBDA_ALL})
-        LAMBDA=${LAMBDA_OUTPUT_FN}
         for i in ${LAMBDA_FNS}; do
-	    LAMBDA=$i
             nuke_cfn $i
         done
         nuke_output

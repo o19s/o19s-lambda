@@ -60,20 +60,24 @@
     "AMILookup": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
-        "Handler": "index.handler",
+        "Handler": "lambda-ami-lookup.handler",
         "Role": { "Fn::GetAtt" : ["AMILookupRole", "Arn"] },
         "Code": {
           "S3Bucket": { "Ref" : "S3Bucket" },
           "S3Key": { "Ref" : "S3Key"}
         },
         "Runtime": "nodejs",
-        "Timeout": "25"
+        "Timeout": "30"
       }
     }
   },
 
   "Outputs" : {
     "AMILookup" : {
+      "Description": "The ARN of the Lambda function.",
+      "Value" : { "Ref" : "AMILookup" }
+    },
+    "AMILookupArn" : {
       "Description": "The ARN of the Lambda function.",
       "Value" : { "Fn::GetAtt": [ "AMILookup", "Arn" ] }
     }
