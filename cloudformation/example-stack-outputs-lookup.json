@@ -1,0 +1,18 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Resources" : {
+    "ExampleStackOutputsLookup": {
+      "Type": "Custom::StackOutputs",
+      "Properties": {
+        "ServiceToken": { "Fn::Join": [ "", [ "arn:aws:lambda:", { "Ref": "AWS::Region" }, ":", { "Ref": "AWS::AccountId" }, ":function:StackOutputsLookup" ] ] },
+        "StackName" : "lambda-stack-outputs-lookup"
+      }
+    }
+  },
+  "Outputs" : {
+    "ExampleOutputLookupResult" : {
+      "Description": "The ARN of the Lambda function.",
+      "Value" : { "Fn::GetAtt": [ "ExampleStackOutputsLookup", "StackOutputsLookupRole" ] }
+    }
+  }
+}
