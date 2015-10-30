@@ -13,8 +13,7 @@ usage () {
 lambda_fn_name () {
     eval ${2}=$(echo ${1} | tr "-" "_")
 }
-LAMBDA_FNS="lambda-ami-lookup"
-LAMBDA_CASES=$(echo ${LAMBDA_FNS} | tr " " "|")
+LAMBDA_FNS="lambda-ami-lookup lambda-ec2-sleep"
 LAMBDA_OUTPUT_FN="lambda-stack-outputs-lookup"
 LAMBDA_ALL="all"
 ALL_OPTS="$LAMBDA_OUTPUT_FN $LAMBDA_FNS"

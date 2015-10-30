@@ -31,9 +31,6 @@ nuke_s3 () {
     aws s3 rm ${S3_TARGET} --recursive
 }
 case "$LAMBDA" in
-    ${LAMBDA_CASES})
-        nuke_cfn $LAMBDA
-        ;;
     ${LAMBDA_OUTPUT_FN})
         nuke_output
         ;;
@@ -46,7 +43,8 @@ case "$LAMBDA" in
     "s3")
         nuke_s3
         ;;
-    *)
-        usage
-        exit 3
 esac
+
+if [[ ${LAMBDA_FNS} =~ ${LAMBDA} ]]; then
+    nuke_cfn $LAMBDA
+fi

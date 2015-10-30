@@ -6,6 +6,7 @@ This repo is to make it easy for you to harness some AWS Lambda functions for yo
 
  * AMILookup
  * StackOutputsLookup
+ * ec2-sleep
  
 Currently the functions are for CloudFormation custom resource calls only. The design is to create as minimal non-CloudFormation expressed resources as possible and then use only CloudFormation managed resources from there out. Why do it this way? By enumerating your infrastructure via CloudFormation you reduce the number of resources which are present without a readily apparent code driven reason of exiting. CloudFormation deployments keep your resource allocations explicitly defined in code.
 

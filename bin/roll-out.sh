@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+if [ -n "${DEBUG}" ]; then set -x; fi
 # Set the S3 Bucket and Key prefix by settingin the environment.
 # S3Bucket
 # S3Key
@@ -20,7 +21,7 @@ rollout_zip () {
     test_bucket
     [ ! -d "out/build" ] && { mkdir -p "out/build"; }
     TMPFILE=$(pwd)/$(mktemp -u -p out/build ${1}XXXXXX)
-    ZIP_CMD="zip ${TMPFILE} ${1}.js"
+    ZIP_CMD="zip ${TMPFILE} $(basename $(ls src/${1}.*))"
     pushd src > /dev/null 2>&1
     bash -c "${ZIP_CMD}" > /dev/null 2>&1 || FAIL=1
     TMPFILE=$TMPFILE.zip
@@ -69,15 +70,7 @@ test_bucket () {
     bash -c "aws s3 ls s3://${S3Bucket}" >/dev/null 2>&1 || e_e "The S3 Bucket ${S3Bucket} doesn't exist please create it." 1
 }
 
-contains() {
-    [[ $1 =~ $2 ]] && return 0 || return 1
-}
-
 case "$LAMBDA" in
-    ${LAMBDA_CASES})
-        rollout_zip $LAMBDA
-        rollout_cfn $LAMBDA ${S3_FULL_KEY}
-        ;;
     ${LAMBDA_OUTPUT_FN})
         rollout_output
         ;;
@@ -89,9 +82,11 @@ case "$LAMBDA" in
             rollout_cfn $i ${S3_FULL_KEY}
         done
         ;;
-    *)
-        usage
-        exit 3
 esac
+
+if [[ ${LAMBDA_FNS} =~ ${LAMBDA} ]]; then
+    rollout_zip $LAMBDA
+    rollout_cfn $LAMBDA ${S3_FULL_KEY}
+fi
 
 [ ${FAIL} == 1 ] && e_e "Oops something went wrong." 4
